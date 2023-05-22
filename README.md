@@ -1,87 +1,67 @@
-# Readme - Cliente de Recebimento de Áudio
+# Documentação - Streaming de Áudio
 
-Este é um código Python que implementa um cliente para receber e reproduzir um stream de áudio transmitido por um servidor. O cliente utiliza sockets TCP e UDP para se comunicar com o servidor e receber os dados de áudio.
+Este é um arquivo README.md que contém a documentação para um sistema de streaming de áudio utilizando os protocolos UDP e TCP.
 
-## Pré-requisitos
+## 1. UDP / TCP
 
-Certifique-se de ter as seguintes bibliotecas instaladas antes de executar o código:
+No protocolo TCP, existe uma conexão entre o cliente e o servidor, como uma espécie de aperto de mãos entre os dois, que dura até que um deles desconecte. No módulo socket, em Python, por exemplo, isso faz com que o programa levante erros no caso de ocorrer algum problema na transmissão de alguma mensagem.
 
-- `socket`: Biblioteca de rede para criar e manipular sockets.
-- `json`: Biblioteca para serializar/deserializar dados no formato JSON.
-- `audio_stream`: Biblioteca que lida com a reprodução de áudio em tempo real.
-- `pyaudio`: Biblioteca de áudio para a captura e reprodução de áudio.
+Já em UDP, não existe essa conexão. Um host apenas envia um datagrama para outro host na rede e não se importa se este host o recebeu ou não. Isso dificulta as coisas quando, por exemplo, queremos saber se o cliente ainda está conectado no nosso aplicativo, para que possamos evitar que o servidor gaste recursos enviando dados para um cliente que não existe.
 
-## Configuração do cliente
+### 1.1 CONFIGURAÇÕES DOS PROTOCOLOS
 
-O cliente é configurado com as seguintes constantes:
+Os dois protocolos (TCP e UDP) foram utilizados no trabalho:
 
-```python
-SERVER_HOST = '10.0.25.93'
-SERVER_PORT = 5050
-SERVER_ADDRESS = (SERVER_HOST, SERVER_PORT)
-CHUNK = 1024
-```
+- Servidor TCP - Rodando na porta 9090
+- Servidor UDP - Rodando na porta 9191
+- Cliente TCP - Rodando em uma porta aleatória (definida pelo sistema)
+- Cliente UDP - Rodando em uma porta aleatória (definida pelo sistema)
 
-- `SERVER_HOST`: O endereço IP do servidor ao qual o cliente irá se conectar.
-- `SERVER_PORT`: O número da porta do servidor.
-- `SERVER_ADDRESS`: A tupla contendo o endereço IP e a porta do servidor.
-- `CHUNK`: O tamanho dos chunks de áudio que serão recebidos do servidor.
+## 2. MENSAGENS
 
-## Configurações do stream de áudio
+### Notificação de endereço (UDP)
 
-O cliente estabelece uma conexão TCP com o servidor e recebe as configurações do stream de áudio em formato JSON. Essas configurações incluem a largura de amostra, a quantidade de canais e a taxa de quadros.
+Direção: Cliente → Servidor
 
-```python
-tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-tcp_client.connect(SERVER_ADDRESS)
+O cliente, antes de qualquer outra comunicação com o servidor via UDP, deve enviar primeiro uma mensagem para o servidor para que ele possa saber o seu endereço na rede.
 
-audio_stream_configurations_data_string = tcp_client.recv(CHUNK).decode()
-audio_stream_configurations = json.loads(audio_stream_configurations_data_string)
-```
+### Mensagem de retorno (UDP)
 
-## Configuração do stream de reprodução
+Direção: Cliente → Servidor
 
-O cliente utiliza a biblioteca `pyaudio` para configurar o stream de reprodução de áudio. As configurações obtidas do servidor são utilizadas para definir a largura de amostra, a quantidade de canais e a taxa de quadros do stream.
+Como explicado anteriormente, não existe uma conexão entre servidor e cliente em UDP. Portanto, para cada mensagem que o servidor envia para o cliente via UDP, o cliente deverá enviar uma resposta apenas para confirmar que recebeu a mensagem.
 
-```python
-py_audio = PyAudio()
+### Escolha de música (TCP)
 
-audio_stream = PyAudioStream(
-    audio=py_audio,
-    width=audio_stream_configurations['width'],
-    channel_amount=audio_stream_configurations['channel_amount'],
-    framerate=audio_stream_configurations['framerate'],
-)
-```
+Direção: Servidor ⇄ Cliente
 
-## Configuração do cliente UDP
+O servidor envia a lista de músicas disponíveis e o cliente responde com a sua escolha.
 
-O cliente estabelece uma conexão UDP com o servidor enviando uma mensagem de início de conexão. Neste exemplo, a mensagem é simplesmente "Hello World".
+### Envio de configurações de música (TCP)
 
-```python
-udp_client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-udp_client.sendto(b'Hello World', (SERVER_HOST, 6060))
-```
+Direção: Servidor → Cliente
 
-## Recebimento e reprodução do áudio
+O servidor lê os dados da música escolhida e cria uma mensagem contendo os dados necessários para que ela possa ser tocada no lado do cliente (ex: framerate, tamanho, etc).
 
-O cliente inicia um loop em que recebe os chunks de áudio do servidor através do socket UDP e os escreve no stream de reprodução.
+### Envio de música (UDP)
 
-```python
-try:
-    data = udp_client.recv(4096)
+Direção: Servidor → Cliente
 
-    while data:
-        data = udp_client.recv(4096)
-        audio_stream.write(data)
-```
+O servidor lê os frames da música e os envia para o endereço do cliente em pedaços. O cliente então usa esses frames para tocar a música.
 
-## Finalização do cliente
+## 3. FLUXO
 
-Após a conclusão do loop de recebimento de áudio, o cliente finaliza o stream de reprodução, termina a instância do `pyaudio` e fecha as conexões com os sockets.
+O fluxo do sistema consiste nas etapas descritas acima, onde o cliente e o servidor se comunicam utilizando os protocolos TCP e UDP para transmitir as informações e os frames de áudio.
 
-```python
-finally:
-    audio_stream.stop()
-    py_audio.terminate()
-    udp_client.close()
+## 4. MÓDULOS
+
+A seguir estão os módulos utilizados no sistema:
+
+- Socket: O módulo Socket foi utilizado para realizar a interação entre o servidor e o cliente.
+- Threading: Utilizado para implementar o acesso de vários clientes ao servidor.
+- Queue: O pacote Queue (fila) foi usado para guardar os frames recebidos em excesso pelo cliente. Dessa forma, o cliente poderia receber mais frames do que precisava em algum momento, eliminando o efeito de "picote" no áudio.
+- Wave: Utilizado para fazer a leitura dos frames e configurações dos arquivos de áudio das músicas.
+- PyAudio: O módulo PyAudio foi utilizado para tocar os frames de áudio no lado do cliente.
+- Time: Utilizado para obrigar a execução do código a esperar em certos momentos, como no envio de frames do servidor para o cliente para evitar o seu sobrecarregamento.
+- JSON: Utilizado para utilizar dados complexos (como listas e dicionários) no envio de mensagens.
+- OS: Módulo utilizado para fazer a leitura dos nomes dos arquivos de música no diretório das músicas.
