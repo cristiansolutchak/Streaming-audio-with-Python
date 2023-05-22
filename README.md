@@ -12,10 +12,10 @@ Já em UDP, não existe essa conexão. Um host apenas envia um datagrama para ou
 
 Os dois protocolos (TCP e UDP) foram utilizados no trabalho:
 
-- Servidor TCP - Rodando na porta 9090
-- Servidor UDP - Rodando na porta 9191
-- Cliente TCP - Rodando em uma porta aleatória (definida pelo sistema)
-- Cliente UDP - Rodando em uma porta aleatória (definida pelo sistema)
+- `Servidor TCP` - Rodando na porta 9090
+- `Servidor UDP` - Rodando na porta 9191
+- `Cliente TCP` - Rodando em uma porta aleatória (definida pelo sistema)
+- `Cliente UDP` - Rodando em uma porta aleatória (definida pelo sistema)
 
 ## 2. MENSAGENS
 
@@ -59,11 +59,33 @@ O fluxo do sistema consiste nas etapas descritas acima, onde o cliente e o servi
 
 A seguir estão os módulos utilizados no sistema:
 
-- Socket: O módulo Socket foi utilizado para realizar a interação entre o servidor e o cliente.
-- Threading: Utilizado para implementar o acesso de vários clientes ao servidor.
-- Queue: O pacote Queue (fila) foi usado para guardar os frames recebidos em excesso pelo cliente. Dessa forma, o cliente poderia receber mais frames do que precisava em algum momento, eliminando o efeito de "picote" no áudio.
-- Wave: Utilizado para fazer a leitura dos frames e configurações dos arquivos de áudio das músicas.
-- PyAudio: O módulo PyAudio foi utilizado para tocar os frames de áudio no lado do cliente.
-- Time: Utilizado para obrigar a execução do código a esperar em certos momentos, como no envio de frames do servidor para o cliente para evitar o seu sobrecarregamento.
-- JSON: Utilizado para utilizar dados complexos (como listas e dicionários) no envio de mensagens.
-- OS: Módulo utilizado para fazer a leitura dos nomes dos arquivos de música no diretório das músicas.
+- `Socket:` O módulo Socket foi utilizado para realizar a interação entre o servidor e o cliente.
+- `Threading:` Utilizado para implementar o acesso de vários clientes ao servidor.
+- `Queue:` O pacote Queue (fila) foi usado para guardar os frames recebidos em excesso pelo cliente. Dessa forma, o cliente poderia receber mais frames do que precisava em algum momento, eliminando o efeito de "picote" no áudio.
+- `Wave:` Utilizado para fazer a leitura dos frames e configurações dos arquivos de áudio das músicas.
+- `PyAudio:` O módulo PyAudio foi utilizado para tocar os frames de áudio no lado do cliente.
+- `Time:` Utilizado para obrigar a execução do código a esperar em certos momentos, como no envio de frames do servidor para o cliente para evitar o seu sobrecarregamento.
+- `JSON:` Utilizado para utilizar dados complexos (como listas e dicionários) no envio de mensagens.
+- `OS:` Módulo utilizado para fazer a leitura dos nomes dos arquivos de música no diretório das músicas.
+
+## 5. INSTALAÇÃO E EXECUÇÃO
+
+Para que a instalação e execução do código ocorra de maneira correta, basta baixar todos os seguintes módulos do python atravez do PIP.
+
+
+### Pré-requisitos
+
+1 - Verifique a versão do seu python, utilizar versão 3 ou superior
+
+
+2 - Certifique-se de ter as seguintes bibliotecas instaladas antes de executar o código:
+
+- `Wave:` pip install Wave
+- `PyAudio:` pip3 install PyAudio
+
+3 - Certifique-se que o cliente esteja na mesma rede do servidor.
+
+4 - Execute o arquivo do servidor.
+
+5 -Execute o arquivo do cliente para se conectar ao servidor.
+
