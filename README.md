@@ -53,6 +53,8 @@ O servidor lê os frames da música e os envia para o endereço do cliente em pe
 
 O fluxo do sistema consiste nas etapas descritas acima, onde o cliente e o servidor se comunicam utilizando os protocolos TCP e UDP para transmitir as informações e os frames de áudio.
 
+<img src="diagrama.png">
+
 ## 4. MÓDULOS
 
 A seguir estão os módulos utilizados no sistema:
