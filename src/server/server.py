@@ -84,15 +84,17 @@ def handle_client(client, client_address):
 
             send_udp(frames, client_udp_address)
             time.sleep(0.01)
-    except (BlockingIOError, ConnectionResetError):
+    except (BlockingIOError, ConnectionResetError, TimeoutError):
         pass
     finally:
         print(f"[CONEXÃO] Cliente em {client_address} desconectou")
 
         disconnect_client(client)
 
-        if wave_file:
+        try:
             wave_file.close()
+        except UnboundLocalError:
+            pass
 
 def start():
     server_tcp.listen()
