@@ -92,6 +92,8 @@ try:
     while not frames_queue.empty():
         frames = frames_queue.get()
         audio_stream.write(frames)
+except KeyboardInterrupt:
+    pass
 finally:
     client_tcp.close()
     audio_stream.close()
